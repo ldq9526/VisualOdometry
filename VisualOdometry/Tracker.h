@@ -3,6 +3,7 @@
 
 #include "Camera.h"
 #include "Frame.h"
+#include "Map.h"
 
 namespace VO
 {
@@ -26,6 +27,9 @@ namespace VO
 		/* new captured image makes _currentFrame */
 		Frame _currentFrame, _previousFrame;
 
+		/* a map including all 3d keypoints */
+		Map _map;
+
 		/* detector and descriptor-extractor of ORB keypoints */
 		cv::Ptr<cv::ORB> _orb;
 
@@ -44,10 +48,7 @@ namespace VO
 			const std::vector<cv::KeyPoint> &keyPoints1,
 			const std::vector<cv::KeyPoint> &keyPoints2,
 			const std::vector<cv::DMatch> &matches,
-			cv::Mat &mask, std::vector<cv::Point3d> &points3d);
-
-		/* initialize a map */
-		void initializeMap();
+			cv::Mat &mask, std::unordered_map<int, cv::Point3d> &points3d);
 
 	public:
 		/* constructor */

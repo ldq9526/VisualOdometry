@@ -14,6 +14,9 @@ namespace VO
 		/* ORB keypoints */
 		std::vector<cv::KeyPoint> _keyPoints;
 
+		/* some keypoints' and their 3D position <keypoint_idx,world_key> */
+		std::unordered_map<int, unsigned long> _pointsMap;
+
 		/* ORB descriptor */
 		cv::Mat _descriptors;
 
@@ -40,6 +43,9 @@ namespace VO
 
 		/* set pose Tcw */
 		void setTcw(const cv::Mat &Tcw);
+
+		/* get keypoints' map */
+		std::unordered_map<int, unsigned long> & getPointsMap();
 
 		~Frame();
 	};

@@ -11,6 +11,7 @@ namespace VO
 		/* 3x1 float/double world coodinate */
 		cv::Point3d _worldPoint;
 	public:
+		MapPoint();
 
 		/* point is world coordinate */
 		MapPoint(const cv::Point3d &point);

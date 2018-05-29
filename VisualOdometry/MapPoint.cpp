@@ -3,6 +3,8 @@
 
 namespace VO
 {
+	MapPoint::MapPoint() {}
+
 	MapPoint::MapPoint(const cv::Point3d &point)
 	{
 		_worldPoint.x = point.x;

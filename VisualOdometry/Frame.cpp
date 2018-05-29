@@ -50,4 +50,9 @@ namespace VO
 	{
 		Tcw.copyTo(_Tcw);
 	}
+
+	std::unordered_map<int, unsigned long> & Frame::getPointsMap()
+	{
+		return _pointsMap;
+	}
 }

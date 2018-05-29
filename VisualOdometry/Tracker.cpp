@@ -10,13 +10,14 @@ namespace VO
 		_orb = cv::ORB::create(500, 1.2f, 8);
 		_state = NO_IMAGE;
 		_matcher = cv::BFMatcher(cv::NORM_HAMMING);
+		_map = Map();
 	}
 
 	int Tracker::triangulate(const cv::Mat &R, const cv::Mat t,
 		const std::vector<cv::KeyPoint> &keyPoints1,
 		const std::vector<cv::KeyPoint> &keyPoints2,
 		const std::vector<cv::DMatch> &matches,
-		cv::Mat &mask, std::vector<cv::Point3d> &points3d)
+		cv::Mat &mask, std::unordered_map<int, cv::Point3d> &points3d)
 	{
 		int nInliers = 0;
 		for (int i = 0; i<int(matches.size()); i++)
@@ -43,15 +44,10 @@ namespace VO
 				mask.at<uchar>(i) = 0;
 				continue;
 			}
-			points3d.push_back(cv::Point3d(d1*x1.at<double>(0), d1*x1.at<double>(1), d1));
+			points3d[matches[i].trainIdx] = cv::Point3d(d1*x1.at<double>(0), d1*x1.at<double>(1), d1);
 			++nInliers;
 		}
 		return nInliers;
-	}
-
-	void Tracker::initializeMap()
-	{
-
 	}
 
 	void Tracker::track(const cv::Mat &image)
@@ -78,10 +74,29 @@ namespace VO
 			}
 			cv::Mat K = _camera.getIntrinsicMatrix();
 			cv::Mat E = cv::findEssentialMat(p1, p2, K, cv::RANSAC, 0.999, 1.0, _mask);
-			cv::Mat R, t;/* R,t transform points in _previousFrame to _currentFrame */
+			cv::Mat R, t;/* T21 = [R|t] */
 			if (100 > cv::recoverPose(E, p1, p2, K, R, t, _mask)) return;
-			std::vector<cv::Point3d> points3d;
+
+			/* triangulation and initialize map */
+			std::unordered_map<int, cv::Point3d> points3d;
 			if (100 > triangulate(R, t, KP1, KP2, _matches, _mask, points3d)) return;
+			/* [R|t] and 3D keypoints will be optimized by bundle adjustment */
+			/* BundleAdjustment(); */
+			_map.insertKeyPoints(points3d, _currentFrame.getPointsMap());
+			cv::Mat Tcw = cv::Mat::eye(4, 4, CV_64F);
+
+			/* update _currentFrame and set it as _previousFrame */
+			R.copyTo(Tcw.rowRange(0, 3).colRange(0, 3));
+			t.copyTo(Tcw.col(3).rowRange(0, 3));
+			_currentFrame.setTcw(Tcw);
+			_previousFrame = _currentFrame;
+
+			/* state change to TRACKING if succeed in initializing */
+			_state = TRACKING;
+		}
+		else
+		{
+
 		}
 	}
 }
