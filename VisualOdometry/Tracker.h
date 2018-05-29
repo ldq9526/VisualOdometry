@@ -29,7 +29,7 @@ namespace VO
 		/* detector and descriptor-extractor of ORB keypoints */
 		cv::Ptr<cv::ORB> _orb;
 
-		/* Brute-Force matcher , matches and mask */
+		/* Brute-Force matcher, matches and mask */
 		cv::BFMatcher _matcher;
 		std::vector<cv::DMatch> _matches;
 		cv::Mat _mask;

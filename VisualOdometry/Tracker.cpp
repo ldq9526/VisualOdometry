@@ -67,7 +67,7 @@ namespace VO
 			int nInliers;
 			_currentFrame = Frame(image, _orb);
 			_matcher.match(_previousFrame.getDescriptors(), _currentFrame.getDescriptors(), _matches);
-			nInliers = _matches.size();
+			nInliers = int(_matches.size());
 			if (nInliers < 100) return;
 			std::vector<cv::Point2f> p1(nInliers), p2(nInliers);
 			const std::vector<cv::KeyPoint> &KP1 = _previousFrame.getKeyPoints(), &KP2 = _currentFrame.getKeyPoints();

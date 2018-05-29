@@ -4,15 +4,6 @@ namespace VO
 {
 	Camera::Camera() {}
 
-	/* copy constructor */
-	Camera::Camera(const Camera &camera)
-	{
-		_imageSize.width = camera.getImageSize().width;
-		_imageSize.height = camera.getImageSize().height;
-		camera.getIntrinsicMatrix().copyTo(_K);
-		camera.getIntrinsicMatrixInv.copyTo(_K_inv);
-	}
-
 	Camera::Camera(const std::string &filePath)
 	{
 		cv::FileStorage fs;

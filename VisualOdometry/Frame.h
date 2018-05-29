@@ -1,6 +1,7 @@
 #ifndef VO_FRAME
 #define VO_FRAME
 
+#include <unordered_map>
 #include <opencv2/core.hpp>
 #include <opencv2/features2d.hpp>
 #include <vector>

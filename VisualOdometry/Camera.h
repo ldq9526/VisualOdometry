@@ -19,9 +19,6 @@ namespace VO
 		/* default constructer */
 		Camera();
 
-		/* copy constructor */
-		Camera(const Camera &camera);
-
 		Camera(const std::string &filePath);
 
 		/* get the size of image captured by camera */

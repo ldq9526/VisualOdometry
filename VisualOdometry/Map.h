@@ -1,6 +1,7 @@
 #ifndef VO_MAP
 #define VO_MAP
 
+#include "MapPoint.h"
 #include <unordered_map>
 #include <vector>
 #include <opencv2/core.hpp>
@@ -14,9 +15,13 @@ namespace VO
 		unsigned long _counter;
 
 		/* storage as key-value */
-		std::unordered_map<unsigned long, cv::Point3d> _mapPoints;
+		std::unordered_map<unsigned long, MapPoint> _mapPoints;
 	public:
 		Map();
+
+		/* insert a set of 3D keypoints */
+		void insertKeyPoints(const std::vector<cv::Point3d> &points);
+
 		~Map();
 	};
 }
