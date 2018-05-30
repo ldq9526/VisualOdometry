@@ -38,17 +38,8 @@ namespace VO
 		std::vector<cv::DMatch> _matches;
 		cv::Mat _mask;
 	private:
-		/* triangulation for 3D keypoints
-			[R|t] : transformation from _previousFrame to _currentFrame
-			keyPoints1,keyPoints2 : ORB keypoints from _previousFrame and _currentFrame
-			matches,mask : marked matches will be triangulated , outliers will be unmarked
-			points3d : output of 3D keypoints
-			return number of inliers */
-		int triangulate(const cv::Mat &R, const cv::Mat t,
-			const std::vector<cv::KeyPoint> &keyPoints1,
-			const std::vector<cv::KeyPoint> &keyPoints2,
-			const std::vector<cv::DMatch> &matches,
-			cv::Mat &mask, std::unordered_map<int, cv::Point3d> &points3d);
+		/* find coarse matches between _previousFrame and _currentFrame by BruteForce */
+		void findCoarseMatches();
 
 	public:
 		/* constructor */
