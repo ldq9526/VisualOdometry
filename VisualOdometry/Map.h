@@ -25,6 +25,9 @@ namespace VO
 		/* remove a 3D keypoint by key */
 		bool removeKeyPoint(unsigned long key);
 
+		/* get a 3D point by key */
+		MapPoint getKeyPoint(unsigned long key);
+
 		~Map();
 	};
 }

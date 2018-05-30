@@ -1,5 +1,6 @@
 #include "Tracker.h"
 #include <opencv2/calib3d.hpp>
+#define __DEBUG__
 
 namespace VO
 {
@@ -8,6 +9,7 @@ namespace VO
 		_camera = Camera(cameraFilePath);
 		_orb = cv::ORB::create(500, 1.2f, 8);
 		_state = NO_IMAGE;
+		_lostCount = 0;
 		_matcher = cv::BFMatcher(cv::NORM_HAMMING);
 		_map = Map();
 	}
@@ -99,7 +101,7 @@ namespace VO
 			/* state change to TRACKING if succeed in initializing */
 			_state = TRACKING;
 #ifdef __DEBUG__
-			printf("Map created with %u points . Tracking start !\n", worldPoints.size());
+			printf("Map created with %d points . Tracking start !\n", int(worldPoints.size()));
 #endif
 		}
 		else
@@ -118,6 +120,48 @@ namespace VO
 			}
 			cv::Mat K = _camera.getIntrinsicMatrix();
 			cv::findEssentialMat(p1, p2, K, cv::RANSAC, 0.999, 1.0, _mask);
+			std::unordered_map<int, unsigned long> &previousMap = _previousFrame.getPointsMap();
+			std::unordered_map<int, unsigned long> &currentMap = _currentFrame.getPointsMap();
+			std::vector<cv::Point3d> points3d;
+			std::vector<cv::Point2d> points2d;
+			std::vector<unsigned long> keys;/* record keys for optimizing 3D keypoints */
+			std::vector<int> unTriangulatedMatches;
+			for (int i = 0; i < _mask.rows; i++)
+			{
+				if (!_mask.at<uchar>(i)) continue;
+				if (previousMap.find(_matches[i].queryIdx) != previousMap.end())
+				{
+					unsigned long key = previousMap[_matches[i].queryIdx];
+					keys.push_back(key);
+					points3d.push_back(_map.getKeyPoint(key).getWorldPoint());
+					points2d.push_back(keyPoints2[_matches[i].trainIdx].pt);
+					currentMap[_matches[i].trainIdx] = key;
+				}
+				else
+					unTriangulatedMatches.push_back(i);
+			}
+			if (4 > keys.size())
+			{
+				++_lostCount;
+				if (_lostCount == 5)
+				{
+					_state = LOST;
+#ifdef __DEBUG__
+					printf("Tracking lost !\n");
+#endif
+				}
+				return;
+			}
+			cv::Mat r, t;
+			cv::solvePnP(points3d, points2d, K, cv::Mat(), r, t, false, cv::SOLVEPNP_EPNP);
+			_lostCount = 0;
+			cv::Mat R;
+			cv::Rodrigues(r, R);
+			cv::Mat Tcw = cv::Mat::eye(4, 4, CV_64F);
+			R.copyTo(Tcw.rowRange(0, 3).colRange(0, 3));
+			t.copyTo(Tcw.col(3).rowRange(0, 3));
+			_currentFrame.setTcw(Tcw);
+			_previousFrame = _currentFrame;
 		}
 	}
 }

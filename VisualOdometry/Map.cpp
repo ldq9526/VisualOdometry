@@ -30,4 +30,9 @@ namespace VO
 		_mapPoints.erase(it);
 		return true;
 	}
+
+	MapPoint Map::getKeyPoint(unsigned long key)
+	{
+		return _mapPoints[key];
+	}
 }

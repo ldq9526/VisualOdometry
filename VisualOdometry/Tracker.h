@@ -18,6 +18,9 @@ namespace VO
 			LOST = 3/* when tracking thread is lost */
 		};
 
+		/* counter of continuous lost frames */
+		int _lostCount;
+
 		/* the current state of tracking thread */
 		State _state;
 
