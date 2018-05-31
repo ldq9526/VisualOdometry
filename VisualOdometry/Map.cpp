@@ -59,7 +59,12 @@ namespace VO
 		fclose(fp);
 	}
 
-	MapPoint Map::getKeyPoint(unsigned long key)
+	void Map::updatePoint(unsigned long key, const cv::Point3d &p)
+	{
+		_mapPoints[key].setWorldPosition(p);
+	}
+
+	const MapPoint & Map::getKeyPoint(unsigned long key)
 	{
 		return _mapPoints[key];
 	}

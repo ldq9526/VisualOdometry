@@ -18,8 +18,10 @@ int main(int argc, char **argv)
 	int nImages = int(imageFiles.size());
 	for (int i = 0; i < nImages; i++)
 	{
-		tracker.track(cv::imread(std::string(argv[1])+"/"+ imageFiles[i],cv::IMREAD_UNCHANGED));
+		std::cout << imageFiles[i] << std::endl;
+		tracker.track(cv::imread(std::string(argv[1]) + "/" + imageFiles[i], cv::IMREAD_UNCHANGED));
 	}
+	tracker.shutdown();
 	return 0;
 }
 

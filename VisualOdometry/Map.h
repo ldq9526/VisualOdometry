@@ -34,8 +34,11 @@ namespace VO
 		/* save point cloud */
 		void saveMap();
 
+		/* update 3D point */
+		void updatePoint(unsigned long key, const cv::Point3d &p);
+
 		/* get a 3D point by key */
-		MapPoint getKeyPoint(unsigned long key);
+		const MapPoint & getKeyPoint(unsigned long key);
 
 		~Map();
 	};

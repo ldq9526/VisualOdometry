@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Frame.h"
 #include "Map.h"
+#include "Optimizer.h"
 
 namespace VO
 {
@@ -33,6 +34,9 @@ namespace VO
 		/* a map including all 3d keypoints */
 		Map _map;
 
+		/* Optimizer */
+		Optimizer _optimizer;
+
 		/* detector and descriptor-extractor of ORB keypoints */
 		cv::Ptr<cv::ORB> _orb;
 
@@ -44,12 +48,24 @@ namespace VO
 		/* find coarse matches between _previousFrame and _currentFrame by BruteForce */
 		void findCoarseMatches();
 
+		/* triangulate to add new points to map */
+		void triangulate(
+			const std::vector<cv::KeyPoint> &keyPoints1,
+			const std::vector<cv::KeyPoint> &keyPoints2,
+			std::vector<cv::DMatch> &matches, const std::vector<int> &indicies, cv::Mat &mask,
+			const cv::Mat &R1, const cv::Mat &t1,
+			const cv::Mat &R2, const cv::Mat &t2,
+			std::unordered_map<int, cv::Point3d> &points3d);
+
 	public:
 		/* constructor */
 		Tracker(const std::string &cameraFilePath);
 
 		/* track new captured image */
-		void track(const cv::Mat &image);
+		cv::Mat track(const cv::Mat &image);
+
+		/* end tracking thread */
+		void shutdown();
 	};
 }
 
