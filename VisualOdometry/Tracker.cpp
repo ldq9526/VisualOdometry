@@ -119,7 +119,7 @@ namespace VO
 				p2[i] = keyPoints2[_matches[i].trainIdx].pt;
 			}
 			cv::Mat K = _camera.getIntrinsicMatrix();
-			cv::findEssentialMat(p1, p2, K, cv::RANSAC, 0.999, 1.0, _mask);
+			cv::findEssentialMat(p1, p2, K, cv::RANSAC, 0.999, 1.0, _mask);/* eliminate wrong matches by RANSAC */
 			std::unordered_map<int, unsigned long> &previousMap = _previousFrame.getPointsMap();
 			std::unordered_map<int, unsigned long> &currentMap = _currentFrame.getPointsMap();
 			std::vector<cv::Point3d> points3d;
@@ -145,7 +145,10 @@ namespace VO
 				++_lostCount;
 				if (_lostCount == 5)
 				{
+					_lostCount = 0;
 					_state = LOST;
+					_map.saveMap();
+					_map.removeAllPoints();
 #ifdef __DEBUG__
 					printf("Tracking lost !\n");
 #endif
@@ -154,7 +157,6 @@ namespace VO
 			}
 			cv::Mat r, t;
 			cv::solvePnP(points3d, points2d, K, cv::Mat(), r, t, false, cv::SOLVEPNP_EPNP);
-			_lostCount = 0;
 			cv::Mat R;
 			cv::Rodrigues(r, R);
 			cv::Mat Tcw = cv::Mat::eye(4, 4, CV_64F);
