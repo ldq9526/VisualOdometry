@@ -17,10 +17,7 @@ int main(int argc, char **argv)
 	getImageFiles(std::string(argv[1]) + "/rgb.txt", imageFiles);
 	int nImages = int(imageFiles.size());
 	for (int i = 0; i < nImages; i++)
-	{
-		std::cout << imageFiles[i] << std::endl;
 		tracker.track(cv::imread(std::string(argv[1]) + "/" + imageFiles[i], cv::IMREAD_UNCHANGED));
-	}
 	tracker.shutdown();
 	return 0;
 }

@@ -44,6 +44,9 @@ namespace VO
 		/* set pose Tcw */
 		void setTcw(const cv::Mat &Tcw);
 
+		/* get keyPoint by index */
+		const cv::Point2d & getPoint2d(int index) const;
+
 		/* get keypoints' map */
 		std::unordered_map<int, unsigned long> & getPointsMap();
 

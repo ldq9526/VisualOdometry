@@ -51,6 +51,11 @@ namespace VO
 		Tcw.copyTo(_Tcw);
 	}
 
+	const cv::Point2d & Frame::getPoint2d(int index) const
+	{
+		return cv::Point2d(_keyPoints[index].pt.x, _keyPoints[index].pt.y);
+	}
+
 	std::unordered_map<int, unsigned long> & Frame::getPointsMap()
 	{
 		return _pointsMap;

@@ -29,7 +29,7 @@ namespace VO
 		Camera _camera;
 
 		/* new captured image makes _currentFrame */
-		Frame _currentFrame, _previousFrame;
+		Frame *_currentFrame, *_keyFrame;
 
 		/* a map including all 3d keypoints */
 		Map _map;
@@ -40,29 +40,24 @@ namespace VO
 		/* detector and descriptor-extractor of ORB keypoints */
 		cv::Ptr<cv::ORB> _orb;
 
-		/* Brute-Force matcher, matches and mask */
+		/* Brute-Force matcher */
 		cv::BFMatcher _matcher;
-		std::vector<cv::DMatch> _matches;
-		cv::Mat _mask;
 	private:
-		/* find coarse matches between _previousFrame and _currentFrame by BruteForce */
-		void findCoarseMatches();
+		/* return true if succeed in estimating a coarse Tcw of _currentFrame,
+		   and also get matches & mask between _keyFrame and _currentFrame keypoints */
+		bool estimatePose(std::vector<cv::DMatch> &matches, cv::Mat &mask, cv::Mat &R, cv::Mat &t);
 
 		/* triangulate to add new points to map */
-		void triangulate(
-			const std::vector<cv::KeyPoint> &keyPoints1,
-			const std::vector<cv::KeyPoint> &keyPoints2,
-			std::vector<cv::DMatch> &matches, const std::vector<int> &indicies, cv::Mat &mask,
-			const cv::Mat &R1, const cv::Mat &t1,
-			const cv::Mat &R2, const cv::Mat &t2,
-			std::unordered_map<int, cv::Point3d> &points3d);
+		void triangulate();
 
 	public:
 		/* constructor */
 		Tracker(const std::string &cameraFilePath);
 
+		~Tracker();
+
 		/* track new captured image */
-		cv::Mat track(const cv::Mat &image);
+		const cv::Mat & track(const cv::Mat &image);
 
 		/* end tracking thread */
 		void shutdown();
