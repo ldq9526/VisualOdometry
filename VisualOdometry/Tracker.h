@@ -29,7 +29,7 @@ namespace VO
 		Camera _camera;
 
 		/* new captured image makes _currentFrame */
-		Frame *_currentFrame, *_keyFrame;
+		Frame _currentFrame, _keyFrame;
 
 		/* a map including all 3d keypoints */
 		Map _map;
@@ -40,21 +40,31 @@ namespace VO
 		/* detector and descriptor-extractor of ORB keypoints */
 		cv::Ptr<cv::ORB> _orb;
 
-		/* Brute-Force matcher */
+		/* Brute-Force matcher, matches and mask */
 		cv::BFMatcher _matcher;
+		std::vector<cv::DMatch> _matches;
+		cv::Mat _mask, _emptyMatrix;
 	private:
-		/* return true if succeed in estimating a coarse Tcw of _currentFrame,
-		   and also get matches & mask between _keyFrame and _currentFrame keypoints */
-		bool estimatePose(std::vector<cv::DMatch> &matches, cv::Mat &mask, cv::Mat &R, cv::Mat &t);
+		/* find matches between _keyFrame and _currentFrame by BruteForce & RANSAC
+		   p1 and p2 are matched points on image , E is essential matrix */
+		void findMatches(std::vector<cv::Point2d> &p1, std::vector<cv::Point2d> &p2, cv::Mat &E);
 
-		/* triangulate to add new points to map */
-		void triangulate();
+		/* intialize map , return true if at least 100 map points
+		   E : 3x3 essential matrix
+		   K : 3x3 camera intrinsic matrix
+		   p1,p2 : matched points on image
+		   [R | t] : camera pose to be estimated, Tcw = T21 = Tck
+		   worldPoints : initialized map points, [index_of_keyframe_points, point3d] */
+		bool initializeMap(const cv::Mat &E, const cv::Mat &K,
+			const std::vector<cv::Point2d> &p1, const std::vector<cv::Point2d> &p2,
+			cv::Mat &R, cv::Mat &t, std::unordered_map<int, cv::Point3d> &worldPoints);
+
+		/* estimate camera pose by solvePnP, return true if succeed in estimating camera pose */
+		bool estimatePosePnP(cv::Mat &R, cv::Mat &t, std::vector<int> &untriangulated);
 
 	public:
 		/* constructor */
 		Tracker(const std::string &cameraFilePath);
-
-		~Tracker();
 
 		/* track new captured image */
 		const cv::Mat & track(const cv::Mat &image);

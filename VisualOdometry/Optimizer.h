@@ -15,13 +15,12 @@ namespace VO
 		void bundleAdjustment(
 			const std::vector<cv::Point3d> &points3d,
 			const std::vector<cv::Point2d> &points2d,
-			const cv::Mat &K, cv::Mat &R, cv::Mat &t,
-			const std::vector<unsigned long> keys,
-			Map &map);
+			const cv::Mat &K, cv::Mat &R, cv::Mat &t);
 
 		/* optimize result of triangulation */
 		void bundleAdjustment(
 			std::unordered_map<int, cv::Point3d> &points3d,
+			const std::vector<cv::DMatch> &matches,
 			const std::vector<cv::KeyPoint> &keyPoints,
 			const cv::Mat &K, cv::Mat &R, cv::Mat &t);
 	};

@@ -10,9 +10,7 @@ namespace VO
 	void Optimizer::bundleAdjustment(
 		const std::vector<cv::Point3d> &points3d,
 		const std::vector<cv::Point2d> &points2d,
-		const cv::Mat &K, cv::Mat &R, cv::Mat &t,
-		const std::vector<unsigned long> keys,
-		Map &map)
+		const cv::Mat &K, cv::Mat &R, cv::Mat &t)
 	{
 		typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 3>> Block;
 		std::unique_ptr<Block::LinearSolverType> linearSolver(new g2o::LinearSolverCSparse<Block::PoseMatrixType>());
@@ -76,15 +74,16 @@ namespace VO
 		R.at<double>(2, 0) = Tcw(2, 0); R.at<double>(2, 1) = Tcw(2, 1); R.at<double>(2, 2) = Tcw(2, 2);
 		t.at<double>(0, 0) = Tcw(0, 3); t.at<double>(1, 0) = Tcw(1, 3); t.at<double>(2, 0) = Tcw(2, 3);
 
-		for (int i = 0; i<int(vertices.size()); i++)
+		/*for (int i = 0; i<int(vertices.size()); i++)
 		{
 			Eigen::Vector3d p = vertices[i]->estimate();
 			map.updatePoint(keys[i], cv::Point3d(p(0), p(1), p(2)));
-		}
+		}*/
 	}
 
 	void Optimizer::bundleAdjustment(
 		std::unordered_map<int, cv::Point3d> &points3d,
+		const std::vector<cv::DMatch> &matches,
 		const std::vector<cv::KeyPoint> &keyPoints,
 		const cv::Mat &K, cv::Mat &R, cv::Mat &t)
 	{
@@ -134,7 +133,7 @@ namespace VO
 			edge->setId(index);
 			edge->setVertex(0, dynamic_cast<g2o::VertexSBAPointXYZ*>(optimizer.vertex(index)));
 			edge->setVertex(1, pose);
-			edge->setMeasurement(Eigen::Vector2d(keyPoints[i->first].pt.x, keyPoints[i->first].pt.y));
+			edge->setMeasurement(Eigen::Vector2d(keyPoints[matches[i->first].trainIdx].pt.x, keyPoints[matches[i->first].trainIdx].pt.y));
 			edge->setParameterId(0, 0);
 			edge->setInformation(Eigen::Matrix2d::Identity());
 			optimizer.addEdge(edge);

@@ -13,12 +13,16 @@ namespace VO
 		_mapPoints.clear();
 	}
 
-	void Map::insertKeyPoints(const std::unordered_map<int, cv::Point3d> &points, std::unordered_map<int, unsigned long> &pointsMap)
+	void Map::insertKeyPoints(
+		const std::unordered_map<int, cv::Point3d> &points,
+		const std::vector<cv::DMatch> &matches,
+		std::unordered_map<int, unsigned long> &pointsMap1,
+		std::unordered_map<int, unsigned long> &pointsMap2)
 	{
 		for (auto i = points.begin(); i != points.end(); i++)
 		{
 			_mapPoints[_counter] = MapPoint(i->second);
-			pointsMap[i->first] = _counter;
+			pointsMap1[matches[i->first].queryIdx] = pointsMap2[matches[i->first].trainIdx] = _counter;
 			++_counter;
 		}
 	}
@@ -39,6 +43,11 @@ namespace VO
 
 	void Map::saveMap()
 	{
+		if (!_mapPoints.size())
+		{
+			printf("No map points !\n");
+			return;
+		}
 		char s[10];
 		sprintf(s, "%02d.ply", _mapId++);
 		FILE *fp = fopen(s, "w");
