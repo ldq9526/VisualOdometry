@@ -52,11 +52,12 @@ namespace VO
 	{
 		/* recover camera pose and triangulate keypoints */
 		cv::Mat points3d;
-		if (100 > cv::recoverPose(E, p1, p2, K, R, t, 70.0, _mask, points3d))
-			return false;
+		if (!cv::recoverPose(E, p1, p2, K, R, t, 70.0, _mask, points3d))
+			return true;/* [R|t] = [I|0] */
 		for (int i = 0; i < points3d.cols; i++)
 		{
-			if (!_mask.at<uchar>(i)) continue;
+			if (!_mask.at<uchar>(i))
+				continue;
 			cv::Mat x1 = points3d.col(i).rowRange(0, 3) / points3d.at<double>(3, i);
 			if (x1.at<double>(2) <= 0)
 			{
@@ -71,7 +72,8 @@ namespace VO
 			}
 			worldPoints[i] = cv::Point3d(x1.at<double>(0), x1.at<double>(1), x1.at<double>(2));
 		}
-		if (100 > worldPoints.size()) return false;
+		if (!worldPoints.size())
+			return false;
 
 		/* [R|t] and 3D keypoints are optimized by bundle adjustment */
 		_optimizer.bundleAdjustment(worldPoints, _matches, _currentFrame.getKeyPoints(), K, R, t);
@@ -105,9 +107,10 @@ namespace VO
 				untriangulated.push_back(i);
 		}
 
-		if (4 > outliers.size()) return false;/* too few points */
+		if (4 > outliers.size())/* too few points */
+			return false;
 		cv::Mat r, inliers;/* rotation */
-		if (!cv::solvePnPRansac(points3d, points2d, K, cv::Mat(), r, t, false, 100, 0.4f, 0.99, inliers))
+		if (!cv::solvePnPRansac(points3d, points2d, K, cv::Mat(), r, t, false, 100, 0.4f, 0.99, inliers, cv::SOLVEPNP_EPNP))
 			return false;
 		cv::Rodrigues(r, R);
 
@@ -155,7 +158,8 @@ namespace VO
 			cv::Mat E;
 			std::vector<cv::Point2d> p1, p2;
 			findMatches(p1, p2, E);
-			if (100 > _matches.size()) return _emptyMatrix;
+			if (20 > cv::countNonZero(_mask))
+				return _emptyMatrix;
 
 			/* estimate camera pose and initialize map */
 			const cv::Mat &K = _camera.getIntrinsicMatrix();
@@ -163,8 +167,10 @@ namespace VO
 			std::unordered_map<int, cv::Point3d> worldPoints;
 			if (!initializeMap(E, K, p1, p2, R, t, worldPoints))
 				return _emptyMatrix;
+			/* return true but no inliers, [R|t] = [I|0] */
+			if (!worldPoints.size()) return _keyFrame.getTcw();
 			
-			/* update _currentFrame and set it as _keyFrame */
+			/* update _currentFrame */
 			cv::Mat Tcw = cv::Mat::eye(4, 4, CV_64F);
 			R.copyTo(Tcw.rowRange(0, 3).colRange(0, 3));
 			t.copyTo(Tcw.col(3).rowRange(0, 3));
